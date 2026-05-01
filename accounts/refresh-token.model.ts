@@ -1,0 +1,31 @@
+import { DataTypes, Sequelize } from 'sequelize';
+
+export default function model(sequelize: Sequelize) {
+    const attributes = {
+        token: { type: DataTypes.STRING },
+        expires: { type: DataTypes.DATE },
+        created: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
+        createdByIp: { type: DataTypes.STRING },
+        revoked: { type: DataTypes.DATE },
+        revokedByIp: { type: DataTypes.STRING },
+        replacedByToken: { type: DataTypes.STRING },
+        isExpired: {
+            type: DataTypes.VIRTUAL,
+            get(this: any): boolean {
+                return Date.now() >= this.expires;
+            }
+        },
+        isActive: {
+            type: DataTypes.VIRTUAL,
+            get(this: any): boolean {
+                return !this.revoked && !this.isExpired;
+            }
+        }
+    };
+    
+    const options = {
+        timestamps: false
+    };
+    
+    return sequelize.define('refreshToken', attributes, options);
+}
